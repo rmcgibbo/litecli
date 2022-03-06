@@ -940,10 +940,10 @@ def cli(
         try:
             new_line = True
 
-            if csv:
-                litecli.formatter.format_name = "csv"
-            elif not table:
-                litecli.formatter.format_name = "tsv"
+            # if csv:
+            #     litecli.formatter.format_name = "csv"
+            # elif not table:
+            #     litecli.formatter.format_name = "tsv"
 
             litecli.run_query(stdin_text, new_line=new_line)
             exit(0)
