@@ -469,7 +469,7 @@ class LiteCli(object):
                             self.output(formatted, status)
                         except KeyboardInterrupt:
                             pass
-                        self.echo("Time: %0.03fs" % t)
+                        # self.echo("Time: %0.03fs" % t)
                     except KeyboardInterrupt:
                         pass
 
@@ -614,7 +614,7 @@ class LiteCli(object):
             + self.get_prompt(self.prompt_format).count("\n")
             + 2
         )
-        if status:
+        if status and False:
             margin += 1 + status.count("\n")
 
         return margin
@@ -667,7 +667,7 @@ class LiteCli(object):
                     for line in buf:
                         click.secho(line)
 
-        if status:
+        if status and False:
             self.log_output(status)
             click.secho(status)
 
@@ -856,6 +856,7 @@ class LiteCli(object):
     "--warn/--no-warn", default=None, help="Warn before running a destructive query."
 )
 @click.option("-e", "--execute", type=str, help="Execute command and quit.")
+@click.option('-cmd', type=str, help="Execute command and don't quit.", multiple=True)
 @click.argument("database", default="", nargs=1)
 def cli(
     database,
@@ -869,6 +870,7 @@ def cli(
     warn,
     execute,
     liteclirc,
+    cmd
 ):
     """A SQLite terminal client with auto-completion and syntax highlighting.
 
@@ -896,6 +898,14 @@ def cli(
     litecli.connect(database)
 
     litecli.logger.debug("Launch Params: \n" "\tdatabase: %r", database)
+
+    for c in cmd:
+        try:
+            for _ in litecli.sqlexecute.run(c):
+                pass  # silent
+        except Exception as e:
+            click.secho(str(e), err=True, fg="red")
+            exit(1)
 
     #  --execute argument
     if execute:
