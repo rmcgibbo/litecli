@@ -910,10 +910,10 @@ def cli(
     #  --execute argument
     if execute:
         try:
-            if csv:
-                litecli.formatter.format_name = "csv"
-            elif not table:
-                litecli.formatter.format_name = "tsv"
+            # if csv:
+            #     litecli.formatter.format_name = "csv"
+            # elif not table:
+            #     litecli.formatter.format_name = "tsv"
 
             litecli.run_query(execute)
             exit(0)
