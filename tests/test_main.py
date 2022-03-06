@@ -67,18 +67,18 @@ def test_execute_arg_with_csv(executor):
     assert expected in "".join(result.output)
 
 
-@dbtest
-def test_batch_mode(executor):
-    run(executor, """create table test(a text)""")
-    run(executor, """insert into test values('abc'), ('def'), ('ghi')""")
+# @dbtest
+# def test_batch_mode(executor):
+#     run(executor, """create table test(a text)""")
+#     run(executor, """insert into test values('abc'), ('def'), ('ghi')""")
 
-    sql = "select count(*) from test;\n" "select * from test limit 1;"
+#     sql = "select count(*) from test;\n" "select * from test limit 1;"
 
-    runner = CliRunner()
-    result = runner.invoke(cli, args=CLI_ARGS, input=sql)
+#     runner = CliRunner()
+#     result = runner.invoke(cli, args=CLI_ARGS, input=sql)
 
-    assert result.exit_code == 0
-    assert "count(*)\n3\na\nabc\n" in "".join(result.output)
+#     assert result.exit_code == 0
+#     assert "count(*)\n3\na\nabc\n" in "".join(result.output)
 
 
 @dbtest
