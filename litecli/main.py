@@ -11,6 +11,7 @@ from datetime import datetime
 from io import open
 from collections import namedtuple
 from sqlite3 import OperationalError
+import shutil
 
 from cli_helpers.tabular_output import TabularOutputFormatter
 from cli_helpers.tabular_output import preprocessors
@@ -22,6 +23,7 @@ from prompt_toolkit.shortcuts import PromptSession, CompleteStyle
 from prompt_toolkit.styles.pygments import style_from_pygments_cls
 from prompt_toolkit.document import Document
 from prompt_toolkit.filters import HasFocus, IsDone
+from prompt_toolkit.formatted_text import ANSI
 from prompt_toolkit.layout.processors import (
     HighlightMatchingBracketProcessor,
     ConditionalProcessor,
@@ -87,6 +89,7 @@ class LiteCli(object):
         self.cli_style = c["colors"]
         self.output_style = style_factory_output(self.syntax_style, self.cli_style)
         self.wider_completion_menu = c["main"].as_bool("wider_completion_menu")
+        self.autocompletion = c["main"].as_bool("autocompletion")
         c_dest_warning = c["main"].as_bool("destructive_warning")
         self.destructive_warning = c_dest_warning if warn is None else warn
         self.login_path_as_host = c["main"].as_bool("login_path_as_host")
@@ -160,10 +163,11 @@ class LiteCli(object):
         )
         special.register_special_command(
             self.execute_from_file,
-            "source",
+            ".read",
             "\\. filename",
             "Execute commands from file.",
-            aliases=("\\.",),
+            case_sensitive=True,
+            aliases=("\\.", "source"),
         )
         special.register_special_command(
             self.change_prompt_format,
@@ -380,7 +384,8 @@ class LiteCli(object):
                 and len(prompt) > self.max_len_prompt
             ):
                 prompt = self.get_prompt("\\d> ")
-            return [("class:prompt", prompt)]
+            prompt = prompt.replace("\\x1b", "\x1b")
+            return ANSI(prompt)
 
         def get_continuation(width, line_number, is_soft_wrap):
             continuation = " " * (width - 1) + " "
@@ -545,6 +550,9 @@ class LiteCli(object):
             complete_style = CompleteStyle.MULTI_COLUMN
         else:
             complete_style = CompleteStyle.COLUMN
+
+        if not self.autocompletion:
+            complete_style = CompleteStyle.READLINE_LIKE
 
         with self._completer_lock:
 
@@ -815,7 +823,7 @@ class LiteCli(object):
         """Get the number of lines to reserve for the completion menu."""
         reserved_space_ratio = 0.45
         max_reserved_space = 8
-        _, height = click.get_terminal_size()
+        _, height = shutil.get_terminal_size()
         return min(int(round(height * reserved_space_ratio)), max_reserved_space)
 
     def get_last_query(self):

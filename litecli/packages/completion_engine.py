@@ -105,14 +105,14 @@ def suggest_special(text):
     if cmd in ["\\f", "\\fs", "\\fd"]:
         return [{"type": "favoritequery"}]
 
-    if cmd in ["\\d", "\\dt", "\\dt+", ".schema"]:
+    if cmd in ["\\d", "\\dt", "\\dt+", ".schema", ".indexes"]:
         return [
             {"type": "table", "schema": []},
             {"type": "view", "schema": []},
             {"type": "schema"},
         ]
 
-    if cmd in ["\\.", "source", ".open"]:
+    if cmd in ["\\.", "source", ".open", ".read"]:
         return [{"type": "file_name"}]
 
     if cmd in [".import"]:
@@ -210,7 +210,7 @@ def suggest_based_on_last_token(token, text_before_cursor, full_text, identifier
             # suggest columns that are present in more than one table
             return [{"type": "column", "tables": tables, "drop_unique": True}]
         elif p.token_first().value.lower() == "select":
-            # If the lparen is preceeded by a space chances are we're about to
+            # If the lparen is preceded by a space chances are we're about to
             # do a sub-select.
             if last_word(text_before_cursor, "all_punctuations").startswith("("):
                 return [{"type": "keyword"}]
